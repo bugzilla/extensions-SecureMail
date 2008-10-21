@@ -22,5 +22,5 @@ use strict;
 no warnings qw(void); # Avoid "useless use of a constant in void context"
 
 {
-    'version' => '0.00',
+    'version' => '0.01',
 };
