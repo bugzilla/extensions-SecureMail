@@ -16,9 +16,14 @@
   #
   # Contributor(s): Max Kanat-Alexander <mkanat@bugzilla.org>
   #%]
-<tr>
-  <td colspan="4">
-    <label><input type="checkbox" id="secure_mail" name="secure_mail">
-    Send Secure Mail for Bugs in this Group
-  </td>
-</tr>
+
+<b>PGP/GPG Key</b>
+
+<p>Some bugs are in groups the administrator has deemed 'secure'. This means 
+update emails will only be sent encrypted. Enter your PGP/GPG public key or 
+SMIME certificate here to receive full update emails for such bugs:</p>
+
+<textarea name="public_key" cols="72" rows="12">
+  [%- user.public_key FILTER html %]</textarea>
+
+<hr>

@@ -16,10 +16,12 @@
   #
   # Contributor(s): Max Kanat-Alexander <mkanat@bugzilla.org>
   #%]
-
-[% IF error == "securemail_invalid_key" %]
-   [% title = "Invalid Public Key" %]
-   We were unable to read the public PGP key that you entered. Make sure
-   that you are entering an ASCII-armored public key including the
-   "BEGIN PGP PUBLIC KEY BLOCK" and "END PGP PUBLIC KEY BLOCK" lines.
+[% IF group.is_bug_group %]
+  <tr>
+    <td colspan="4">
+      <label><input type="checkbox" id="secure_mail" name="secure_mail"
+              [% ' checked="checked"' IF group.secure_mail %]>
+      Send only encrypted mail for bugs in this group
+    </td>
+  </tr>
 [% END %]

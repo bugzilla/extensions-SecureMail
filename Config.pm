@@ -12,13 +12,16 @@
 #
 # The Original Code is the Bugzilla SecureMail Extension
 #
-# The Initial Developer of the Original Code is the Mozilla Corporation.
-# Portions created by the Initial Developer are Copyright (C) 2008 the 
-# Initial Developer. All Rights Reserved.
+# The Initial Developer of the Original Code is Mozilla.
+# Portions created by Mozilla are Copyright (C) 2008 Mozilla Corporation.
+# All Rights Reserved.
 #
 # Contributor(s): Max Kanat-Alexander <mkanat@bugzilla.org>
+#                 Gervase Markham <gerv@gerv.net>
 
+package Bugzilla::Extension::Securemail;
 use strict;
+use constant NAME => 'Securemail';
 use constant REQUIRED_MODULES => [
     {
         package => 'Crypt-OpenPGP',
@@ -27,4 +30,11 @@ use constant REQUIRED_MODULES => [
         # PubRing argument.
         version => '1.02',
     },
+    {
+        package => 'Crypt-SMIME',
+        module  => 'Crypt::SMIME',
+        version => 0,
+    },
 ];
+
+__PACKAGE__->NAME;

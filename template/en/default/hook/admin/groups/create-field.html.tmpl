@@ -16,13 +16,9 @@
   #
   # Contributor(s): Max Kanat-Alexander <mkanat@bugzilla.org>
   #%]
-
 <tr>
-  <td colspan="2">
-    <strong>PGP/GPG Key</strong><br />
-    Mails sent for security bugs will have no content unless you
-    enter your ASCII-armored public PGP/GPG key here:<br />
-      <textarea name="public_key" cols="72" rows="12">
-        [%- user.public_key FILTER html %]</textarea>
+  <td colspan="4">
+    <label><input type="checkbox" id="secure_mail" name="secure_mail">
+    Send only encrypted mail for bugs in this group
   </td>
 </tr>
