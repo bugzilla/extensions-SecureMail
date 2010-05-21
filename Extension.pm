@@ -153,7 +153,7 @@ sub template_before_process {
         }
     }
     elsif ($file eq 'account/password/forgotten-password.txt.tmpl') {
-        my $groups = $vars->{'user'}->groups;
+        my $groups = $vars->{'to_user'}->groups;
         if (grep($_->{secure_mail}, @$groups)) {
             $vars->{'encrypt'} = 1;
         }      
