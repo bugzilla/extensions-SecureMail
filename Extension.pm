@@ -110,10 +110,10 @@ sub object_validators {
 sub object_before_create {
     my ($self, $args) = @_;
     my %args = %{ $args };
-    my ($class, $params, $input) = @args{qw(class params input_params)};
+    my ($class, $params) = @args{qw(class params)};
     
     if ($class->isa('Bugzilla::Group')) {
-        $params->{secure_mail} = $input->{secure_mail};
+        $params->{secure_mail} = Bugzilla->cgi->param('secure_mail');
     }
 }
 
