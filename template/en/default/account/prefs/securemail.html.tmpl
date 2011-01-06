@@ -17,13 +17,10 @@
   # Contributor(s): Max Kanat-Alexander <mkanat@bugzilla.org>
   #%]
 
-<b>PGP/GPG Key</b>
+<p>Some bugs in this [% terms.Bugzilla %] are in groups the administrator has 
+deemed 'secure'. This means emails containing information about those bugs 
+will only be sent encrypted. Enter your PGP/GPG public key or 
+SMIME certificate here to receive full update emails for such bugs.</p>
 
-<p>Some bugs are in groups the administrator has deemed 'secure'. This means 
-update emails will only be sent encrypted. Enter your PGP/GPG public key or 
-SMIME certificate here to receive full update emails for such bugs:</p>
-
-<textarea name="public_key" cols="72" rows="12">
-  [%- user.public_key FILTER html %]</textarea>
-
-<hr>
+<textarea id="public_key" name="public_key" cols="72" rows="12">
+  [%- public_key FILTER html %]</textarea>

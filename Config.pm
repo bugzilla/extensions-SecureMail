@@ -19,9 +19,10 @@
 # Contributor(s): Max Kanat-Alexander <mkanat@bugzilla.org>
 #                 Gervase Markham <gerv@gerv.net>
 
-package Bugzilla::Extension::Securemail;
+package Bugzilla::Extension::SecureMail;
 use strict;
-use constant NAME => 'Securemail';
+use constant NAME => 'SecureMail';
+
 use constant REQUIRED_MODULES => [
     {
         package => 'Crypt-OpenPGP',

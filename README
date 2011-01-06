@@ -1,37 +1,8 @@
-This extension must be in a directory called "securemail" in the
+This extension should be placed in a directory called "SecureMail" in the
 Bugzilla extensions/ directory. After installing it, remove the file
-"disabled" and then run checksetup.pl.
+"disabled" (if present) and then run checksetup.pl.
 
 Instructions for user key formats:
 
 S/MIME Keys must be in PEM format - i.e. Base64-encoded text, with BEGIN CERTIFICATE
 PGP keys must be ASCII-armoured - i.e. text, with BEGIN PGP PUBLIC KEY.
-
-Hooks:
-
-> bugmail_before_queue
-    Done - replaced with template_before_process
-    
-> group_end_of_set_all
-    Done - added
-    
-> install_update_db
-    Already exists
-
-> mailer_before_send
-    Already exists
-
-> object_before_create
-    Already exists
-    
-> object_columns
-    Done - backported
-
-> object_validators
-    Done - backported
-
-> token_before_password_reset_send
-    Done - replaced with template_before_process
-
-> user_end_of_set_all
-    Done - added

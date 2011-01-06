@@ -17,8 +17,9 @@
   # Contributor(s): Max Kanat-Alexander <mkanat@bugzilla.org>
   #%]
 <tr>
-  <td colspan="4">
-    <label><input type="checkbox" id="secure_mail" name="secure_mail">
-    Send only encrypted mail for bugs in this group
-  </td>
-</tr>
+  <th>Secure Bugmail:</th>
+  <td colspan="3">
+    <input type="checkbox" id="secure_mail" name="secure_mail"
+            [% ' checked="checked"' IF group.secure_mail %]>
+  </td>  
+</tr>  

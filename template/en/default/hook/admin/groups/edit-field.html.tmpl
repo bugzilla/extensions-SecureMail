@@ -18,10 +18,10 @@
   #%]
 [% IF group.is_bug_group %]
   <tr>
-    <td colspan="4">
-      <label><input type="checkbox" id="secure_mail" name="secure_mail"
+    <th>Secure Bugmail:</th>
+    <td>
+      <input type="checkbox" id="secure_mail" name="secure_mail"
               [% ' checked="checked"' IF group.secure_mail %]>
-      Send only encrypted mail for bugs in this group
-    </td>
+    </td>  
   </tr>
 [% END %]
