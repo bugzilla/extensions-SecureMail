@@ -22,5 +22,7 @@ deemed 'secure'. This means emails containing information about those bugs
 will only be sent encrypted. Enter your PGP/GPG public key or 
 SMIME certificate here to receive full update emails for such bugs.</p>
 
+[% Hook.process('moreinfo') %]
+
 <textarea id="public_key" name="public_key" cols="72" rows="12">
   [%- public_key FILTER html %]</textarea>

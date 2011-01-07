@@ -52,7 +52,6 @@ sub install_update_db {
 ##############################################################################
 # Maintaining new columns
 ##############################################################################
-
 # Make sure generic functions know about the additional fields in the user
 # and group objects.
 sub object_columns {
@@ -175,9 +174,6 @@ sub user_preferences {
 
 ##############################################################################
 # Encrypting the email
-#
-# A lot of this is getting objects for the user (and bug, if applicable) the
-# email refers to.
 ##############################################################################
 sub mailer_before_send {
     my ($self, $args) = @_;
@@ -192,38 +188,36 @@ sub mailer_before_send {
     
     if ($is_bugmail || $is_passwordmail) {
         # Convert the email's To address into a User object
-        my $login = $email->header('To');
-        
+        my $login = $email->header('To');        
         my $emailsuffix = Bugzilla->params->{'emailsuffix'};
         $login =~ s/$emailsuffix$//;
         my $user = new Bugzilla::User({ name => $login });
         
-        # If finding the user fails for some reason, but we determine we 
-        # should be encrypting, we want to make the mail safe. An empty key 
-        # does that.
-        my $public_key = $user ? $user->{'public_key'} : '';
-    
-        my $make_secure = 0;
+        # Default to secure. (Of course, this means if this extension has a 
+        # bug, lots of people are going to get bugmail falsely claiming their 
+        # bugs are secure and they need to add a key...)
+        my $make_secure = 1;
         
         if ($is_bugmail) {
             # This is also a bit of a hack, but there's no header with the 
             # bug ID in. So we take the first number in the subject.
             my $bug_id = ($email->header('Subject') =~ /^[^\d]+(\d+)/);
             my $bug = new Bugzilla::Bug($bug_id);
-            # If we can't find a bug object to check its groups, fail safe.
-            if (!$bug || grep($_->{secure_mail}, @{ $bug->groups_in })) {
-                $make_secure = 1;
+            if ($bug && !grep($_->{secure_mail}, @{ $bug->groups_in })) {
+                $make_secure = 0;
             }
         }
         elsif ($is_passwordmail) {
-            # If we don't know who the user is, something funny is going on.
-            # So don't send the password mail. The 'user' will be asked to 
-            # contact the admin.
-            if (!$user || grep($_->{secure_mail}, @{ $user->groups })) {
-                $make_secure = 1;
+            if ($user && !grep($_->{secure_mail}, @{ $user->groups })) {
+                $make_secure = 0;
             }      
         }
         
+        # If finding the user fails for some reason, but we determine we 
+        # should be encrypting, we want to make the mail safe. An empty key 
+        # does that.
+        my $public_key = $user ? $user->{'public_key'} : '';
+    
         if ($make_secure) {
             _make_secure($email, $public_key, $is_bugmail);
         }
@@ -239,10 +233,13 @@ sub _make_secure {
     # We only change the subject if it's a bugmail; password mails don't have
     # confidential information in the subject.
     if ($is_bugmail) {            
-        $bug_id = ($subject =~ /^[^\d]+(\d+)/);
+        $subject =~ /^[^\d]+(\d+)/;
+        $bug_id = $1;
         
         my $new_subject = $subject;
-        # (This won't work if somebody's changed the Subject format...)
+        # This is designed to still work if the admin changes the word
+        # 'bug' to something else. However, it could break if they change
+        # the format of the subject line in another way.
         $new_subject =~ s/($bug_id\])\s+(.*)$/$1 (Secure bug updated)/;
         $email->header_set('Subject', $new_subject);
     }
@@ -262,8 +259,13 @@ sub _make_secure {
         
         # "@" matches every key in the public key ring, which is fine, 
         # because there's only one key in our keyring.
+        #
+        # We use the CAST5 cipher because the Rijndael (AES) module doesn't
+        # like us for some reason I don't have time to debug fully.
+        # ("key must be an untainted string scalar")
         my $encrypted = $pgp->encrypt(Data       => $body, 
                                       Recipients => "@", 
+                                      Cipher     => 'CAST5',
                                       Armour     => 1);
         if (defined $encrypted) {
             $email->body_set($encrypted);
