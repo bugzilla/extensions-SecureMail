@@ -31,6 +31,7 @@ use Bugzilla::Error;
 use Crypt::OpenPGP::KeyRing;
 use Crypt::OpenPGP;
 use Crypt::SMIME;
+use Encode;
 
 our $VERSION = '0.4';
 
@@ -248,11 +249,16 @@ sub _make_secure {
         ##################
         # PGP Encryption #
         ##################
-        my $body = $email->body;
+
+        # We need to work with the body as a decoded string as we may
+        # modify it
+        my $body = $email->body_str;
         if ($is_bugmail) {
             # Subject gets placed in the body so it can still be read
             $body = "Subject: $subject\n\n" . $body;
         }
+        # Crypt::OpenPGP requires an encoded string
+        $body = encode('UTF8', $body);
         
         my $pubring = new Crypt::OpenPGP::KeyRing(Data => $key);
         my $pgp = new Crypt::OpenPGP(PubRing => $pubring);
