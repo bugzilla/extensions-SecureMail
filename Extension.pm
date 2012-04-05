@@ -26,7 +26,7 @@ use base qw(Bugzilla::Extension);
 use Bugzilla::Group;
 use Bugzilla::Object;
 use Bugzilla::User;
-use Bugzilla::Util qw(correct_urlbase trim trick_taint);
+use Bugzilla::Util qw(correct_urlbase trim trick_taint is_7bit_clean);
 use Bugzilla::Error;
 use Bugzilla::Mailer;
 
@@ -227,9 +227,12 @@ sub mailer_before_send {
         if ($is_bugmail) {
             # This is also a bit of a hack, but there's no header with the 
             # bug ID in. So we take the first number in the subject.
-            my ($bug_id) = ($email->header('Subject') =~ /^[^\d]+(\d+)/);
+            my ($bug_id) = ($email->header('Subject') =~ /\[\D+(\d+)\]/);
             my $bug = new Bugzilla::Bug($bug_id);
-            if ($bug && !grep($_->{secure_mail}, @{ $bug->groups_in })) {
+            if ($bug 
+                && !$bug->{'error'} 
+                && !grep($_->{secure_mail}, @{ $bug->groups_in })) 
+            {
                 $make_secure = 0;
             }
         }
@@ -262,7 +265,7 @@ sub _make_secure {
     my ($email, $key, $sanitise_subject) = @_;
 
     my $subject = $email->header('Subject');
-    my ($bug_id) = $subject =~ /^\D+(\d+)/;
+    my ($bug_id) = $subject =~ /\[\D+(\d+)\]/;
 
     my $key_type = 0;
     if ($key && $key =~ /PUBLIC KEY/) {
@@ -275,6 +278,9 @@ sub _make_secure {
     if ($key_type && $sanitise_subject) {
         # Subject gets placed in the body so it can still be read
         my $body = $email->body_str;
+        if (!is_7bit_clean($subject)) {
+            $email->encoding_set('quoted-printable');
+        }
         $body = "Subject: $subject\015\012\015\012" . $body;
         $email->body_str_set($body);
     }
@@ -350,7 +356,7 @@ sub _make_secure {
         # This is designed to still work if the admin changes the word
         # 'bug' to something else. However, it could break if they change
         # the format of the subject line in another way.
-        $subject =~ s/($bug_id\])\s+(.*)$/$1 (Secure bug updated)/;
+        $subject =~ s/($bug_id\])\s+(.*)$/$1 (Secure bug $bug_id updated)/;
         $email->header_set('Subject', $subject);
     }
 }
