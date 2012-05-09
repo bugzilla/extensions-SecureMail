@@ -229,10 +229,7 @@ sub mailer_before_send {
             # bug ID in. So we take the first number in the subject.
             my ($bug_id) = ($email->header('Subject') =~ /\[\D+(\d+)\]/);
             my $bug = new Bugzilla::Bug($bug_id);
-            if ($bug 
-                && !$bug->{'error'} 
-                && !grep($_->{secure_mail}, @{ $bug->groups_in })) 
-            {
+            if (!_should_secure_bug($bug)) {
                 $make_secure = 0;
             }
         }
@@ -259,6 +256,31 @@ sub mailer_before_send {
             _make_secure($email, $public_key, $is_bugmail);
         }
     }
+}
+
+# Custom hook for bugzilla.mozilla.org (see bug 752400)
+sub bugmail_referenced_bugs {
+    my ($self, $args) = @_;
+    # Sanitise subjects of referenced bugs.
+    my $referenced_bugs = $args->{'referenced_bugs'};
+    # No need to sanitise subjects if the entire email will be secured.
+    return if _should_secure_bug($args->{'updated_bug'});
+    # Replace the subject if required
+    foreach my $ref (@$referenced_bugs) {
+        if (grep($_->{'secure_mail'}, @{ $ref->{'bug'}->groups_in })) {
+            $ref->{'short_desc'} = "(Secure bug)";
+        }
+    }
+}
+
+sub _should_secure_bug {
+    my ($bug) = @_;
+    # If there's a problem with the bug, err on the side of caution and mark it
+    # as secure.
+    return
+        !$bug
+        || $bug->{'error'}
+        || grep($_->{secure_mail}, @{ $bug->groups_in });
 }
 
 sub _make_secure {
